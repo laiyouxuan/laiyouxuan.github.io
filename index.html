@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>给x的时光胶囊</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif; }
+        body {
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; margin: 0; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+        }
+        .container {
+            background: white; padding: 40px 30px; border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1); width: 100%;
+            max-width: 800px; /* 加宽了容器以适应时间轴 */
+        }
+        .lock-icon { font-size: 64px; margin-bottom: 20px; }
+        h1 { color: #2d3436; margin-bottom: 10px; text-align: center; }
+        .subtitle { color: #636e72; text-align: center; margin-bottom: 35px; font-size: 1.1em; }
+        #passwordInput {
+            padding: 16px; width: 100%; border: 2px solid #ddd; border-radius: 12px;
+            font-size: 16px; margin-bottom: 20px; transition: all 0.3s;
+        }
+        #passwordInput:focus { outline: none; border-color: #9b59b6; box-shadow: 0 0 0 3px rgba(155, 89, 182, 0.2); }
+        #submitBtn {
+            background: linear-gradient(to right, #9b59b6, #8e44ad);
+            color: white; border: none; padding: 18px; border-radius: 12px;
+            font-size: 18px; font-weight: bold; cursor: pointer; width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        #submitBtn:hover { transform: translateY(-3px); box-shadow: 0 7px 14px rgba(155, 89, 182, 0.4); }
+        #errorMsg { color: #ff7675; margin-top: 15px; text-align: center; font-weight: bold; min-height: 22px; }
+        #hiddenContent { display: none; margin-top: 40px; }
+
+        /* 时间轴专属样式 */
+        .timeline {
+            position: relative; max-width: 700px; margin: 40px auto 20px;
+        }
+        .timeline::after { /* 中间轴线 */
+            content: ''; position: absolute; width: 6px;
+            background: linear-gradient(to bottom, #9b59b6, #dfe6e9);
+            top: 0; bottom: 0; left: 50%; margin-left: -3px; border-radius: 3px;
+        }
+        .timeline-item {
+            padding: 15px 40px; position: relative; width: 50%;
+            box-sizing: border-box;
+        }
+        .timeline-item:nth-child(odd) { left: 0; }
+        .timeline-item:nth-child(even) { left: 50%; }
+        .timeline-content {
+            padding: 20px; background: #f9f9f9; border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.08); position: relative;
+            border-left: 5px solid #9b59b6; /* 左侧装饰条 */
+        }
+        .timeline-item:nth-child(even) .timeline-content { border-left: none; border-right: 5px solid #8e44ad; }
+        .timeline-item .date {
+            font-weight: bold; color: #8e44ad; margin-bottom: 8px; font-size: 1.05em;
+        }
+        .timeline-item h3 { color: #2d3436; margin-top: 0; margin-bottom: 10px; }
+        .timeline-item p { color: #555; line-height: 1.6; margin-bottom: 12px; }
+        .timeline-item img {
+            width: 100%; max-height: 220px; object-fit: cover; border-radius: 12px;
+            margin-top: 12px; border: 1px solid #eee;
+        }
+        /* 时间轴节点图标 */
+        .timeline-item::after {
+            content: ''; position: absolute; width: 24px; height: 24px;
+            background-color: white; border: 5px solid #9b59b6;
+            border-radius: 50%; top: 25px; z-index: 1;
+        }
+        .timeline-item:nth-child(odd)::after { right: -12px; }
+        .timeline-item:nth-child(even)::after { left: -12px; border-color: #8e44ad; }
+        @media screen and (max-width: 768px) {
+            .timeline::after { left: 31px; }
+            .timeline-item { width: 100%; padding-left: 70px; padding-right: 25px; left: 0 !important; }
+            .timeline-item::after { left: 19px !important; }
+            .timeline-content { border-left: 5px solid #9b59b6 !important; border-right: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="loginArea">
+            <div style="text-align: center;">
+                <span class="lock-icon">🔐</span>
+                <h1>x的时光隧道</h1>
+                <p class="subtitle">这里封存着我们共同的记忆<br>请输入专属密码，解锁我们的故事</p>
+            </div>
+            <input type="password" id="passwordInput" placeholder="请输入密码..." autocomplete="off">
+            <button id="submitBtn">进入时光隧道</button>
+            <div id="errorMsg"></div>
+        </div>
+
+        <div id="hiddenContent">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h1 style="color: #2d3436;">📅 我们的友谊时间轴</h1>
+                <p style="color: #636e72;">一路以来的点点滴滴，都值得珍藏。</p>
+            </div>
+
+            <!-- 时间轴内容区域：请从这里开始编辑 -->
+            <div class="timeline">
+
+                <!-- 事件1：第一次聊天 -->
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="date">2022.08.15</div>
+                        <h3>第一次聊天</h3>
+                        <p>还记得是在新生群里，因为讨论一道数学题我们加上了好友。你开头第一句是“你好呀，我是萱萱”，我说“我是儇儇”。没想到，这就是我们故事的开始。</p>
+                        <!-- 如果有当时的截图，可以放在这里 -->
+                        <!-- <img src="https://你的图床链接/first-chat.jpg" alt="第一次聊天截图"> -->
+                    </div>
+                </div>
+
+                <!-- 事件2：成为闺蜜 -->
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="date">2022.11.03</div>
+                        <h3>正式成为闺蜜</h3>
+                        <p>那天体育课下大雨，我们都没带伞，一起冲回教室。在路上你突然说：“我觉得我们很像，以后就当彼此的闺蜜吧！” 我毫不犹豫地点头。从那天起，“萱萱”和“儇儇”就成了绑定词。</p>
+                    </div>
+                </div>
+
+                <!-- 事件3：关键安慰 -->
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="date">2023.03.20</div>
+                        <h3>深夜里的安慰</h3>
+                        <p>我因为家里的事心情特别差，半夜给你发消息。你竟然秒回，陪我聊到凌晨三四点，说了很多鼓励的话。那句“儇儇勇敢飞，x勇相随”就是从这里来的。你是我最安心的港湾。</p>
+                    </div>
+                </div>
+
+                <!-- 事件4：拍合照 -->
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="date">2023.10.01</div>
+                        <h3>第一张拍立得合照</h3>
+                        <p>国庆节一起出去玩，在咖啡馆用了店里的拍立得。虽然照片有点“糊”，但我们都笑得好开心。这张照片我一直放在笔袋里。就像我说的：<em>“照片是模糊的，但此刻并肩的温度，在我心里清晰如初。”</em></p>
+                        <!-- 强烈建议把这张有意义的照片放上来 -->
+                        <img src="https://i.ibb.co/WZrmtF8/Screenshot-2024-08-21-at-20-48-36.png"  alt="我们的拍立得合照"
+                                 style="width: 100%; max-height: 220px; object-fit: cover; border-radius: 12px; margin-top: 12px; border: 1px solid #eee;">
+                    </div>
+                </div>
+
+                <!-- 事件5：上次生日礼物 -->
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="date">2023.12.24</div>
+                        <h3>上次生日礼物</h3>
+                        <p>你送我的生日礼物和那封信，我看了无数遍。“昭昭如愿，岁岁安澜”是我听过最美的祝福。今年，轮到我来为你准备惊喜了。</p>
+                    </div>
+                </div>
+
+                <!-- 你可以继续添加更多事件 -->
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="date">2024.??.??</div>
+                        <h3>未完待续...</h3>
+                        <p>我们的故事还在继续。期待和你一起写下未来的每一个章节。</p>
+                    </div>
+                </div>
+            </div>
+            <!-- 时间轴内容区域结束 -->
+
+             <!-- 背景音乐 -->
+            <audio id="bgm" loop preload="auto" style="display: none;">
+                <source src="Musics/银河列车.mp3" type="audio/mpeg">
+            </audio>
+            <script>
+                // 尝试播放音乐的函数
+                function tryPlayBGM() {
+                    var audio = document.getElementById('bgm');
+                    audio.volume = 0.5;
+                    var playPromise = audio.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch(function(error) {
+                            console.log("自动播放可能被浏览器阻止。");
+                        });
+                    }
+                }
+                // 监听解锁事件
+                window.addEventListener('hashchange', function() {
+                    if(window.location.hash === '#unlocked') {
+                        tryPlayBGM();
+                    }
+                });
+                // 页面加载时也检查一次
+                window.onload = function() {
+                    if(window.location.hash === '#unlocked') {
+                        tryPlayBGM();
+                    }
+                };
+            </script>
+
+
+            <div style="text-align: center; margin-top: 50px; color: #888; font-style: italic;">
+                <p>—— 时光会走远，但回忆永存。生日快乐，x！ ——</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const correctPassword = "xuan"; // 请务必修改密码！
+        document.getElementById('submitBtn').addEventListener('click', checkPassword);
+        document.getElementById('passwordInput').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') checkPassword();
+        });
+        function checkPassword() {
+            const input = document.getElementById('passwordInput').value;
+            const errorMsg = document.getElementById('errorMsg');
+            if (input === correctPassword) {
+                document.getElementById('loginArea').style.display = 'none';
+                document.getElementById('hiddenContent').style.display = 'block';
+                window.location.hash = 'unlocked';
+            } else {
+                errorMsg.textContent = '密码不对哦，再想想吧~';
+                document.getElementById('passwordInput').value = '';
+                document.getElementById('passwordInput').focus();
+            }
+        }
+        window.onload = function() {
+            if(window.location.hash === '#unlocked') {
+                document.getElementById('loginArea').style.display = 'none';
+                document.getElementById('hiddenContent').style.display = 'block';
+            }
+        };
+    </script>
+</body>
+</html>
